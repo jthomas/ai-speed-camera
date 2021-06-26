@@ -2,6 +2,9 @@ import json
 import re
 import functools
 import math
+import itertools
+import sys
+import numpy
 
 seconds = re.compile("\d+(\.\d+)?")
 
@@ -31,6 +34,35 @@ mps_to_khm = lambda mps: round((mps * 3.6), 2)
 
 car_i = 0
 
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)   
+
+def generate_bounding_boxes(start_bb, end_bb, steps):
+    step_coords = lambda coord: numpy.linspace(start_bb[coord], end_bb[coord], num=steps, endpoint=False)[1:]
+    to_bb = lambda left, top, right, bottom: {'left': left, 'top': top, 'right': right, 'bottom': bottom}
+    bb_coords = map(step_coords, ['left', 'top', 'right', 'bottom'])
+    bounding_boxes = map(lambda coords: to_bb(*coords), zip(*bb_coords))
+    return bounding_boxes
+
+def add_missing_frames(frames):
+    frame_pairs = pairwise(frames)
+    all_frames = []
+    for (start, end) in frame_pairs:
+        all_frames.append(start)
+        start_index = start[0]
+        end_index = end[0]
+        start_bb = start[1]
+        end_bb = end[1]
+        steps = end_index - start_index
+        missing_bbs = generate_bounding_boxes(start_bb, end_bb, steps)
+        missing_frames = [(index , bb) for index, bb in enumerate(missing_bbs, start=(start_index + 1))]
+        all_frames.extend(missing_frames)
+        all_frames.append(end)
+    return all_frames
+
 def calculate_speed(frames, distance = 15):
     global car_i
     print("CALCULATE_SPEED", car_i)
@@ -50,7 +82,8 @@ def calculate_speed(frames, distance = 15):
 def parse_annotation(annotation):
     frames = annotation['frames']
     frame_boxes = list(map(frame_to_box_lookup, frames))
-    frame_box_lookup = functools.reduce(merge_lookups, frame_boxes, {})
+    all_frame_boxes = add_missing_frames(frame_boxes)
+    frame_box_lookup = functools.reduce(merge_lookups, all_frame_boxes, {})
     frame_box_lookup['car_speed'] = calculate_speed(frame_boxes)
     return frame_box_lookup
 
