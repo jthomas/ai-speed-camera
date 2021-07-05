@@ -26,12 +26,11 @@ def annotate_frames(cars_frame_lookup, input_video, output_video, frame_rate, wi
         for idx, car in enumerate(cars_frame_lookup):
             if frame_number in car:
                 logging.debug('car #%s = %s', idx, car[frame_number])
-                if (car['car_speed'] > 1):
-                    frame = cv2.rectangle(frame, box_start(car[frame_number], width, height), box_end(car[frame_number], width, height), color, thickness)
-                    frame = cv2.putText(frame, "car " + str(idx) + " speed: " + str(car['car_speed']) + "km/h", box_start(car[frame_number], width, height), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 0), 4)
-                    centroid = bb_centroid(car[frame_number])
-                    coords = normalised_to_xy(centroid[0], centroid[1], width, height)
-                    frame = cv2.circle(frame, coords, radius=10, color=(255, 255, 255), thickness=-1)
+                frame = cv2.rectangle(frame, box_start(car[frame_number], width, height), box_end(car[frame_number], width, height), color, thickness)
+                frame = cv2.putText(frame, "car " + str(idx) + " speed: " + str(car['car_speed']) + "km/h", box_start(car[frame_number], width, height), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 0), 4)
+                centroid = bb_centroid(car[frame_number])
+                coords = normalised_to_xy(centroid[0], centroid[1], width, height)
+                frame = cv2.circle(frame, coords, radius=10, color=(255, 255, 255), thickness=-1)
 
         #cv2.imshow('annotated-frame', frame)
         #cv2.waitKey(1)

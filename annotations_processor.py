@@ -72,20 +72,25 @@ def add_missing_frames(frames):
         all_frames.append(end)
     return all_frames
 
+# Calculate relative distance travelled across X axis in frame (0..1) 
+# between centres of two relative bounding boxes within frame 
+def relative_distance_traveled(bb_start, bb_end):
+    start_centroid = bb_centroid(bb_start)
+    end_centroid = bb_centroid(bb_end)
+    return abs_distance(start_centroid[0], end_centroid[0])
+
 # Calculate speed of car from frames.
 # Use start and end bounding box locations as start and end positions.
 # Use centroid of the bounding box as estimated car position.
 # Bounding boxes are normalised within frame (0 -> 1) - need to convert relative distance travelled
 # across the frame back to known distance covered by the frame in the video.
 def calculate_speed(frames, frame_rate, distance, index):
-    start, end= frames[0], frames[-1]
-    start_centroid = bb_centroid(start[1])
-    end_centroid = bb_centroid(end[1])
-    relative_distance_traveled = abs_distance(start_centroid[0], end_centroid[0])
-    actual_distance_traveled = distance * relative_distance_traveled
+    start, end = frames[0], frames[-1]
+    rdt = relative_distance_traveled(start[1], end[1])
+    actual_distance_traveled = distance * rdt 
     time = frame_number_to_seconds(end[0], frame_rate) - frame_number_to_seconds(start[0], frame_rate)
-    speed = mps_to_khm(actual_distance_traveled / time)
-    logging.info("car #%s: speed=%s (distance=%s time=%s)", index, speed, actual_distance_traveled, time)
+    speed = mps_to_khm(actual_distance_traveled / time) if time > 0 else 0.0
+    logging.info("car #%s: speed = %6.2f\t(distance = %6.2f,  time = %.2f)", index, speed, actual_distance_traveled, time)
     return speed
 
 def parse_annotation(index, annotation, frame_rate, distance):
@@ -94,11 +99,19 @@ def parse_annotation(index, annotation, frame_rate, distance):
     all_frame_boxes = add_missing_frames(frame_boxes)
     frame_box_lookup = functools.reduce(merge_lookups, all_frame_boxes, {})
     frame_box_lookup['car_speed'] = calculate_speed(frame_boxes, frame_rate, distance, index)
+    frame_box_lookup['rdt'] = relative_distance_traveled(frame_boxes[0][1], frame_boxes[-1][1])
+    frame_box_lookup['index'] = index
     return frame_box_lookup
 
-def extract_cars(annotations_response, frame_rate, distance):
+# Car is valid if is travelled faster and further than minimum speeds and distances given.
+def is_car_valid(car, min_speed, min_rdt):
+    return car['car_speed'] >= min_speed and car['rdt'] >= min_rdt
+
+def extract_cars(annotations_response, frame_rate, distance, min_speed, min_rdt):
     ar = annotations_response['response']['annotationResults'][0]['objectAnnotations']
     cars = list(filter(is_car, ar))
-    logging.info('Discovered ' + str(len(cars)) + ' cars in annotation response')
+    logging.info('Discovered ' + str(len(cars)) + ' total cars in annotation response')
     cars_frame_boxes_lookup = list(map(lambda args: parse_annotation(args[0], args[1], frame_rate, distance), enumerate(cars)))
-    return cars_frame_boxes_lookup
+    valid_cars = list(filter(lambda car: is_car_valid(car, min_speed, min_rdt), cars_frame_boxes_lookup))
+    logging.info('Discovered ' + str(len(valid_cars)) + ' valid cars in annotation response: ' + ", ".join(list(map(lambda c: str(c['index']), valid_cars))))
+    return valid_cars

@@ -16,11 +16,13 @@ parser.add_argument('--distance', help='horizontal distance (metres) captured by
 parser.add_argument('--frame-rate', help='frame rate for video file', type=int, default=30)
 parser.add_argument('--width', help='width for input video file', type=int, default=1920)
 parser.add_argument('--height', help='heightfor input video file', type=int, default=1080)
+parser.add_argument('--min-speed', help='ignore cars travelling slower than threshold (kmph)', type=int, default=1)
+parser.add_argument('--min-distance', help='ignore cars travelling  minimum relative distance across frame (0..1)', type=float, default=0)
 
 args = parser.parse_args()
 
 input = args.annotations.read()
 results = json.loads(input)
-cars_frame_lookup = extract_cars(results, args.frame_rate, args.distance)
+cars_frame_lookup = extract_cars(results, args.frame_rate, args.distance, args.min_speed, args.min_distance)
 
 annotate_frames(cars_frame_lookup, args.video.name, args.output, args.frame_rate, args.width, args.height)
