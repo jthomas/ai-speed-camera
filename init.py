@@ -13,7 +13,7 @@ parser.add_argument('--video', help='the video file to process', required=True, 
 parser.add_argument('--output', help='the processed output video file', required=True)
 parser.add_argument('--annotations', help='annotation response JSON file from Google Cloud Video API', required=True, type=argparse.FileType('r'))
 parser.add_argument('--distance', help='horizontal distance (metres) captured by video', required=True, type=int)
-parser.add_argument('--frame-rate', help='frame rate for video file', type=int, default=30)
+parser.add_argument('--frame-rate', help='frame rate for video file', type=int, default=15)
 parser.add_argument('--width', help='width for input video file', type=int, default=1920)
 parser.add_argument('--height', help='heightfor input video file', type=int, default=1080)
 parser.add_argument('--min-speed', help='ignore cars travelling slower than threshold (kmph)', type=int, default=1)

@@ -23,13 +23,15 @@ frame_number_to_seconds = lambda frame_number, frame_rate: frame_number / frame_
 
 is_car = lambda oa: oa['entity']['description'] == 'car'
 
+default_bb = { "left": 0, "right": 0, "top": 0, "bottom": 0 }
+
 def frame_to_box_lookup(frame, frame_rate):
     timeOffset = frame['timeOffset']
     m = time_to_seconds(timeOffset)
     if m is not None:
         seconds = float(m.group())
         frame_number = seconds_to_frame_number(seconds, frame_rate)
-        bounding_box = frame['normalizedBoundingBox']
+        bounding_box = default_bb | frame['normalizedBoundingBox']
         return (frame_number, bounding_box)
     else: 
         return (None, None)

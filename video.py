@@ -1,6 +1,7 @@
 import cv2
 import logging
 from annotations_processor import bb_centroid
+from tqdm import tqdm
 
 # Blue color in BGR
 color = (255, 0, 0)
@@ -15,14 +16,21 @@ box_end = lambda box, width, height: normalised_to_xy(box['right'], box['bottom'
 
 def annotate_frames(cars_frame_lookup, input_video, output_video, frame_rate, width, height):
     src = cv2.VideoCapture(input_video)
+    length = int(src.get(cv2.CAP_PROP_FRAME_COUNT))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     dest = cv2.VideoWriter(output_video, fourcc, frame_rate, (width, height))
 
+    def frame_iter():
+        while True:
+            ret, frame = src.read()
+            if ret is False: 
+                break
+            yield frame 
+
     frame_number = 0
-    while(True):
+
+    for frame in tqdm(frame_iter(), total=length): 
         logging.debug('annotating frame #%s', frame_number)
-        ret, frame = src.read()
-        if ret is False: break
         for idx, car in enumerate(cars_frame_lookup):
             if frame_number in car:
                 logging.debug('car #%s = %s', idx, car[frame_number])
@@ -32,12 +40,8 @@ def annotate_frames(cars_frame_lookup, input_video, output_video, frame_rate, wi
                 coords = normalised_to_xy(centroid[0], centroid[1], width, height)
                 frame = cv2.circle(frame, coords, radius=10, color=(255, 255, 255), thickness=-1)
 
-        #cv2.imshow('annotated-frame', frame)
-        #cv2.waitKey(1)
         dest.write(frame)
         frame_number += 1
-        print(".", end="", flush=True)
 
     src.release()
     dest.release()
-    #cv2.destroyAllWindows()
