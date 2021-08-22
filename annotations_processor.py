@@ -86,13 +86,13 @@ def relative_distance_traveled(bb_start, bb_end):
 # Use centroid of the bounding box as estimated car position.
 # Bounding boxes are normalised within frame (0 -> 1) - need to convert relative distance travelled
 # across the frame back to known distance covered by the frame in the video.
-def calculate_speed(frames, frame_rate, distance, index):
+def calculate_speed(frames, frame_rate, distance, index, start_time, end_time):
     start, end = frames[0], frames[-1]
     rdt = relative_distance_traveled(start[1], end[1])
     actual_distance_traveled = distance * rdt 
     time = frame_number_to_seconds(end[0], frame_rate) - frame_number_to_seconds(start[0], frame_rate)
     speed = mps_to_khm(actual_distance_traveled / time) if time > 0 else 0.0
-    logging.info("car #%s: speed = %6.2f\t(distance = %6.2f,  time = %.2f)", index, speed, actual_distance_traveled, time)
+    logging.debug("car #%s: speed = %6.2f\t(start = %s,  end = %s,  distance = %6.2f,  time = %.2f)", index, speed, start_time, end_time, actual_distance_traveled, time)
     return speed
 
 def parse_annotation(index, annotation, frame_rate, distance):
@@ -100,7 +100,9 @@ def parse_annotation(index, annotation, frame_rate, distance):
     frame_boxes = list(map(lambda f: frame_to_box_lookup(f, frame_rate), frames))
     all_frame_boxes = add_missing_frames(frame_boxes)
     frame_box_lookup = functools.reduce(merge_lookups, all_frame_boxes, {})
-    frame_box_lookup['car_speed'] = calculate_speed(frame_boxes, frame_rate, distance, index)
+    frame_box_lookup['entrance_time'] = frames[0]['timeOffset']
+    frame_box_lookup['exit_time'] = frames[-1]['timeOffset']
+    frame_box_lookup['car_speed'] = calculate_speed(frame_boxes, frame_rate, distance, index, frame_box_lookup['entrance_time'], frame_box_lookup['exit_time'])
     frame_box_lookup['rdt'] = relative_distance_traveled(frame_boxes[0][1], frame_boxes[-1][1])
     frame_box_lookup['index'] = index
     return frame_box_lookup
