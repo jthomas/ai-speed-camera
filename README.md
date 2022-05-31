@@ -2,11 +2,11 @@
 
 This repository contains the source for an AI-powered digital speed camera. It can detect vehicles in video files and calculate their speeds. It will produce an annotated version of the source video where cars are labelled with their speeds. The car speed statistics can also be exported to a CSV file.
 
-GIF
+![AI Speed Camera Example](ai-speed-camera.gif)
 
-The project uses the [Google Cloud Video AI API](https://cloud.google.com/video-intelligence) to track moving cars in video source files. API results from this service are used to calculate speeds based on a known fixed distance of video frame. FFMPEG is used to produce an annotated video file with cars labelled with their speeds.
+The project uses the [Google Cloud Video AI API](https://cloud.google.com/video-intelligence) to track moving cars in video source files. API results from this service are used to calculate speeds based on a known fixed distance of video frame. [FFMPEG](https://ffmpeg.org/) is used to produce an annotated video file with cars labelled with their speeds.
 
-*If you want to learn more about this project - please see this blog post here:*
+*If you want to learn more about this project - please see this blog post here: https://jamesthom.as/2022/05/ai-powered-speed-camera/*
 
 ## Requirements
 
@@ -83,18 +83,13 @@ INFO:root:Processing source video file
 100%|█████████████████████████████████████████████████| 1/1 [00:00<00:00, 26.71it/s]
 ```
 
-## Example
-
-
-
 ## Limitations
 
-- Parallel to road. Assume straight line.
-- Supurious results (max speed).
+- Camera frame must be parallel to road. Code assumes cars detected are travelling along a straight horizontal line. Direction of travel does not matter.
+- Car detection algorithm will produce anomalies, i.e. phantom "cars" will only exist for a short number of frames in different locations. The code attempts to strip these out by removing those with unrealistic speeds. 
 
 ## Future Ideas
 
 - Make it real-time?
 - Mobile app?
 - Detect other objects?
-
