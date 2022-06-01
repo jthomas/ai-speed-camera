@@ -56,8 +56,11 @@ https://videointelligence.googleapis.com/v1/projects/<X>/locations/<REGION>/oper
 
 ### Run Python Script To Annotate Video
 
-```
-python3 init.py --video input.mp4 --output dest.mp4 --annotations results.json --distance 32
+```shell
+python -m ai_speed_camera --video input.mp4 --output dest.mp4 --annotations results.json --distance 32
+
+# try it out with data samples
+python -m ai_speed_camera --video sample/dene_road.mp4 --output dest.mp4 --annotations sample/ouput.json --distance 32
 ```
 
 The Python script to calculate speeds and annotate the video file takes the following parameters (mandatory parameters in bold).
