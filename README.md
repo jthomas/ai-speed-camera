@@ -12,7 +12,7 @@ The project uses the [Google Cloud Video AI API](https://cloud.google.com/video-
 
 - Google Cloud Platform Account
 - Python3 with Numpy, CV2 and tqdm libraries installed
-- Source video file of cars. Video must be from a fixed position. Camera should be parallel to the road. 
+- Source video file of cars. Video must be from a fixed position. Camera should be parallel to the road.
 - Measured real-world distance covered by video frame.
 
 ## Usage
@@ -33,7 +33,7 @@ The project uses the [Google Cloud Video AI API](https://cloud.google.com/video-
 - Send HTTP request to Google Cloud Video AI API.
 
   ```
-  curl -X POST \                                                                                                            
+  curl -X POST \
   -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
   -H "Content-Type: application/json; charset=utf-8" \
   -d @request.json \
@@ -49,7 +49,7 @@ https://videointelligence.googleapis.com/v1/projects/<X>/locations/<REGION>/oper
 - Save output from API result (when it is available) to a JSON file.
 
 ```
-curl -X GET \                                                                                                              
+curl -X GET \
 -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
 https://videointelligence.googleapis.com/v1/projects/<X>/locations/<REGION>/operations/<Y> > results.json
 ```
@@ -69,8 +69,8 @@ The Python script to calculate speeds and annotate the video file takes the foll
 - `--frame-rate`: Source video frame rate (default :15)
 - `--width`: Source video width (pixels - default: 1920)
 - `--height`: Source video height (pixels - default: 1080)
-- `--min-speed`: Ignore cars with speed lower than this value. Used to ignore fixed vehicles in frame or anomolous cars detected (kmph - default: 1). 
-- `--min-distance`: Ignore cars which travel less than this relative distance in the frame. Used to remove anomolous cars detected (relative distance between 0 & 1 - default: 0). 
+- `--min-speed`: Ignore cars with speed lower than this value. Used to ignore fixed vehicles in frame or anomolous cars detected (kmph - default: 1).
+- `--min-distance`: Ignore cars which travel less than this relative distance in the frame. Used to remove anomolous cars detected (relative distance between 0 & 1 - default: 0).
 - `--export-to-csv`: Export car speed statistics to CSV file (output filename)
 
 The Python script will produce the output below whilst running. It prints the number of cars detected in the AI API result set and the number of valid cars (in reference to minimum speeds and distances). A progress bar will be shown during the video processing stage with estimated time left.
@@ -86,7 +86,7 @@ INFO:root:Processing source video file
 ## Limitations
 
 - Camera frame must be parallel to road. Code assumes cars detected are travelling along a straight horizontal line. Direction of travel does not matter.
-- Car detection algorithm will produce anomalies, i.e. phantom "cars" will only exist for a short number of frames in different locations. The code attempts to strip these out by removing those with unrealistic speeds. 
+- Car detection algorithm will produce anomalies, i.e. phantom "cars" will only exist for a short number of frames in different locations. The code attempts to strip these out by removing those with unrealistic speeds.
 
 ## Future Ideas
 
