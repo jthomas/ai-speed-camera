@@ -3,10 +3,10 @@ import csv
 import json
 import logging
 
-logging.basicConfig(level=logging.INFO)
-
 from .annotations_processor import extract_cars
 from .video import annotate_frames
+
+logging.basicConfig(level=logging.INFO)
 
 parser = argparse.ArgumentParser(description="Estimate speed of cars in video file.")
 
