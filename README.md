@@ -17,6 +17,15 @@ The project uses the [Google Cloud Video AI API](https://cloud.google.com/video-
 
 ## Usage
 
+### TLDR - Run Demo
+1. Install requirements via [poetry](https://pypi.org/project/poetry/)
+    - `poetry install`
+2. Run as below
+```
+# uses existing video with pre-generatated annotations from google cloud video ai api
+python -m ai_speed_camera --video sample_data/dene_road.mp4 --output dest.mp4 --annotations sample_data/output.json --distance 32
+```
+
 ### Process Source Video File with Cloud Video AI API
 
 - Upload the video file to a [Google Cloud Storage Bucket](https://cloud.google.com/storage).
@@ -59,8 +68,8 @@ https://videointelligence.googleapis.com/v1/projects/<X>/locations/<REGION>/oper
 ```shell
 python -m ai_speed_camera --video input.mp4 --output dest.mp4 --annotations results.json --distance 32
 
-# try it out with data samples
-python -m ai_speed_camera --video sample/dene_road.mp4 --output dest.mp4 --annotations sample/ouput.json --distance 32
+# try it out with pregenerated annotations
+python -m ai_speed_camera --video sample_data/dene_road.mp4 --output dest.mp4 --annotations sample_data/output.json --distance 32
 ```
 
 The Python script to calculate speeds and annotate the video file takes the following parameters (mandatory parameters in bold).
