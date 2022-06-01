@@ -8,6 +8,7 @@ authors = ["James Thomas <james@jamesthom.as>"]
 python = "^3.10"
 numpy = "^1.22.4"
 tqdm = "^4.64.0"
+opencv-python = "^4.5.5"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -18,3 +19,7 @@ pre-commit = "^2.19.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.isort]
+profile = "black"
