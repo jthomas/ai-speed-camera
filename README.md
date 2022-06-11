@@ -1,3 +1,6 @@
+
+![Tests](https://github.com/jthomas/ai-speed-camera/actions/workflows/tests.yml/badge.svg)
+
 # AI-Powered Speed Camera 🚗📸
 
 This repository contains the source for an AI-powered digital speed camera. It can detect vehicles in video files and calculate their speeds. It will produce an annotated version of the source video where cars are labelled with their speeds. The car speed statistics can also be exported to a CSV file.
