@@ -19,9 +19,14 @@ pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 
 [tool.pytest.ini_options]
-addopts = "--cov=ai_speed_camera"
+addopts = "--cov=ai_speed_camera --cov-fail-under=50"
 testpaths = [
     "tests",
+]
+
+[tool.coverage.run]
+omit = [
+    "ai_speed_camera/__main__.py",
 ]
 
 [build-system]
