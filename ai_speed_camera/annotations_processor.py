@@ -6,26 +6,43 @@ import re
 
 import numpy
 
-seconds = re.compile("\d+(\.\d+)?")
+seconds = re.compile(r"\d+(\.\d+)?")
 
-line_midpoint = lambda start, end: (start + end) / 2
 
-bb_centroid = lambda bb: (
-    line_midpoint(bb["left"], bb["right"]),
-    line_midpoint(bb["top"], bb["bottom"]),
-)
+def line_midpoint(start, end):
+    return (start + end) / 2
 
-abs_distance = lambda x1, x2: math.sqrt((x2 - x1) ** 2)
 
-mps_to_khm = lambda mps: round((mps * 3.6), 2)
+def bb_centroid(bb):
+    return (
+        line_midpoint(bb["left"], bb["right"]),
+        line_midpoint(bb["top"], bb["bottom"]),
+    )
 
-time_to_seconds = lambda time: seconds.match(time)
 
-seconds_to_frame_number = lambda seconds, frame_rate: int(seconds * frame_rate)
+def abs_distance(x1, x2):
+    return math.sqrt((x2 - x1) ** 2)
 
-frame_number_to_seconds = lambda frame_number, frame_rate: frame_number / frame_rate
 
-is_car = lambda oa: oa["entity"]["description"] == "car"
+def mps_to_khm(mps):
+    return round((mps * 3.6), 2)
+
+
+def time_to_seconds(time):
+    return seconds.match(time)
+
+
+def seconds_to_frame_number(seconds, frame_rate):
+    return int(seconds * frame_rate)
+
+
+def frame_number_to_seconds(frame_number, frame_rate):
+    return frame_number / frame_rate
+
+
+def is_car(oa):
+    return oa["entity"]["description"] == "car"
+
 
 default_bb = {"left": 0, "right": 0, "top": 0, "bottom": 0}
 
@@ -55,20 +72,29 @@ def merge_lookups(lookup, frame_box):
     return lookup
 
 
-# Generate bounding boxes between two existing positions using number of intermediate steps
 def generate_bounding_boxes(start_bb, end_bb, steps):
-    step_coords = lambda coord: numpy.linspace(
-        start_bb[coord], end_bb[coord], num=steps, endpoint=False
-    )[1:]
-    to_bb = lambda left, top, right, bottom: {
+    """
+    Generate bounding boxes between two existing positions using number
+    of intermediate steps
+    """
+
+    def step_coords(coord):
+        return numpy.linspace(
+            start_bb[coord], end_bb[coord], num=steps, endpoint=False
+        )[1:]
+
+    bb_coords = map(step_coords, ["left", "top", "right", "bottom"])
+    bounding_boxes = map(lambda coords: to_bb(*coords), zip(*bb_coords))
+    return bounding_boxes
+
+
+def to_bb(left, top, right, bottom):
+    return {
         "left": left,
         "top": top,
         "right": right,
         "bottom": bottom,
     }
-    bb_coords = map(step_coords, ["left", "top", "right", "bottom"])
-    bounding_boxes = map(lambda coords: to_bb(*coords), zip(*bb_coords))
-    return bounding_boxes
 
 
 # Annotations frame rate may differ from frame rate of the video source.
@@ -101,12 +127,15 @@ def relative_distance_traveled(bb_start, bb_end):
     return abs_distance(start_centroid[0], end_centroid[0])
 
 
-# Calculate speed of car from frames.
-# Use start and end bounding box locations as start and end positions.
-# Use centroid of the bounding box as estimated car position.
-# Bounding boxes are normalised within frame (0 -> 1) - need to convert relative distance travelled
-# across the frame back to known distance covered by the frame in the video.
 def calculate_speed(frames, frame_rate, distance, index, start_time, end_time):
+    """
+    Calculate speed of car from frames.
+    - Use start and end bounding box locations as start and end positions.
+    - Use centroid of the bounding box as estimated car position.
+    - Bounding boxes are normalised within frame (0 -> 1) need to convert
+        relative distance travelled across the frame back to known distance
+        covered by the frame in the video.
+    """
     start, end = frames[0], frames[-1]
     rdt = relative_distance_traveled(start[1], end[1])
     actual_distance_traveled = distance * rdt
@@ -115,7 +144,10 @@ def calculate_speed(frames, frame_rate, distance, index, start_time, end_time):
     )
     speed = mps_to_khm(actual_distance_traveled / time) if time > 0 else 0.0
     logging.debug(
-        "car #%s: speed = %6.2f\t(start = %s,  end = %s,  distance = %6.2f,  time = %.2f)",
+        (
+            "car #%s: speed = %6.2f\t(start = %s,  end = %s,  "
+            "distance = %6.2f,  time = %.2f)"
+        ),
         index,
         speed,
         start_time,
@@ -148,8 +180,11 @@ def parse_annotation(index, annotation, frame_rate, distance):
     return frame_box_lookup
 
 
-# Car is valid if is travelled faster and further than minimum speeds and distances given.
 def is_car_valid(car, min_speed, min_rdt):
+    """
+    car is valid if is travelled faster and further than
+    minimum speeds and distances given.
+    """
     return car["car_speed"] >= min_speed and car["rdt"] >= min_rdt
 
 
