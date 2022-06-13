@@ -15,6 +15,19 @@ flake8 = "^4.0.1"
 black = "^22.3.0"
 isort = "^5.10.1"
 pre-commit = "^2.19.0"
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+
+[tool.pytest.ini_options]
+addopts = "--cov=ai_speed_camera --cov-fail-under=58"
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+omit = [
+    "ai_speed_camera/__main__.py",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
