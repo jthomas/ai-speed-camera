@@ -10,6 +10,10 @@ repos:
     -   id: check-json
     -   id: check-toml
     -   id: check-added-large-files
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v2.34.0
+    hooks:
+    -   id: pyupgrade
 -   repo: https://github.com/pre-commit/mirrors-isort
     rev: v5.10.1
     hooks:

@@ -11,14 +11,17 @@ color = (255, 0, 0)
 # Line thickness of 2 px
 thickness = 10
 
-normalised_to_xy = lambda x, y, width, height: (int(x * width), int(y * height))
 
-box_start = lambda box, width, height: normalised_to_xy(
-    box["left"], box["top"], width, height
-)
-box_end = lambda box, width, height: normalised_to_xy(
-    box["right"], box["bottom"], width, height
-)
+def normalised_to_xy(x, y, width, height):
+    return int(x * width), int(y * height)
+
+
+def box_start(box, width, height):
+    return normalised_to_xy(box["left"], box["top"], width, height)
+
+
+def box_end(box, width, height):
+    return normalised_to_xy(box["right"], box["bottom"], width, height)
 
 
 def annotate_frames(
